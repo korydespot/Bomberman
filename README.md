@@ -1,2 +1,2 @@
 # Bomberman
-Bomberman for CMPW 3640
+Bomberman for CMPS 3640
