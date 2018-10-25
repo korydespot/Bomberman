@@ -15,11 +15,52 @@ try:
 except:
     print("----<error>-----\nProblem with imported modules\nModules|Imported\nrandom |"+str(a)+"\ntime   |"+str(b)+"\nPlease fix")
 
+class bomberguy(pygame.sprite.Sprite):
+    def __init__(self,x,y):
+        super().__init__()
+        
+        self.image = pygame.image.load("Bomberman.gif").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+    def get_x(self):
+        return self.rect.x
+    def get_y(self):
+        return self.rect.y
+    def moveRight(self, pixels):
+        self.rect.x += pixels
+    def moveLeft(self, pixels):
+        self.rect.x -= pixels
+    def moveUp(self, pixels):
+        self.rect.y -= pixels
+    def moveDown(self, pixels):
+        self.rect.y += pixels
+        #pygame.draw.rect(self.image, [0,0,18,22])
+
+class bomb(pygame.sprite.Sprite):
+    def __init__(self,x,y):
+        super().__init__()
+
+        self.image = pygame.image.load("Bomb.gif").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+class Brick(pygame.sprite.Sprite):
+    def __init__(self,x,y):
+        super().__init__()
+
+        self.image = pygame.image.load("Brick.gif").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
 class vr:
     #grid width
-    gw = 16
+    gw = 20
     #grid height
-    gh = 16
+    gh = 20
     #square size
     pxl = 32
     #screen width
@@ -40,17 +81,15 @@ vr.sh = vr.gh*vr.pxl
 #setup
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((vr.sw, vr.sh))
+pygame.display.set_caption("Bomberman")
 #pressed = pygame.key.get_pressed()
-c = 0;
 
-class apple:
-    x = random.randint(1,vr.gw-2)
-    y = random.randint(1,vr.gh-2)
-    lvl = 0
+player1 = bomberguy(random.randint(1,vr.gw-2),random.randint(1,vr.gh-2))
+all_sprites_list = pygame.sprite.Group()
+all_sprites_list.add(player1)
 
-class bomb:
-    x = random.randint(1,vr.gw-2)
-    y = random.randint(1,vr.gh-2)
+
+c = 0
 
 class snake:
     ##x first then y
@@ -96,34 +135,24 @@ class gamef:
         pygame.draw.rect(screen, (8,8,8),pygame.Rect(0,0,vr.sw,vr.pxl))
         pygame.draw.rect(screen, (8,8,8),pygame.Rect(0,vr.sh-vr.pxl,vr.sw,vr.pxl))
         color=(0,255,0)
-        pygame.draw.rect(screen, color, pygame.Rect(vr.pxl*apple.x+2,vr.pxl*apple.y+2, vr.pxl-4, vr.pxl-4))
-        pygame.draw.rect(screen, color, pygame.Rect(vr.pxl*apple.x+2,vr.pxl*apple.y+2, vr.pxl-4, vr.pxl-4))
         col = 0
         os = vr.coloroffset
-        for i in range(len(snake.tailx)):
-            if (col+os >= 255):
-                os=-vr.coloroffset
-            elif(col+os<=0):
-                os=vr.coloroffset
-            col+=os
-            color = (col,col,255)
-            pygame.draw.rect(screen, color, pygame.Rect(vr.pxl*snake.tailx[i],vr.pxl*snake.taily[i], vr.pxl, vr.pxl))
         color=(0,0,192)
-        pygame.draw.rect(screen, color, pygame.Rect(vr.pxl*snake.x,vr.pxl*snake.y, vr.pxl, vr.pxl))
+        #pygame.draw.rect(screen, color, pygame.Rect(vr.pxl*snake.x,vr.pxl*snake.y, vr.pxl, vr.pxl))
+        all_sprites_list.draw(screen)
     def keyd():
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_UP]:
-            if(snake.dire != 2):
-                snake.dire=0
+            player1.moveUp(20)
         if pressed[pygame.K_RIGHT]:
-            if(snake.dire != 3):
-                snake.dire=1
+            player1.moveRight(20)
         if pressed[pygame.K_DOWN]:
-            if(snake.dire != 0):
-                snake.dire=2
+            player1.moveDown(20)
         if pressed[pygame.K_LEFT]:
-            if(snake.dire != 1):
-                snake.dire=3
+            player1.moveLeft(20)
+        if pressed[pygame.K_SPACE]:
+            bomb1 = bomb(player1.get_x(),player1.get_y())
+            all_sprites_list.add(bomb1)
     def ref():
         gamef.tails()
         if (snake.dire == 0):
@@ -209,7 +238,6 @@ while not vr.done:
         gamef.ref()
         c=0
         #snake.speed+=1
-    if not(snake.dire  == 5):
-        pygame.display.set_caption("Snake!!!|Score: "+str(snake.leng-4))
     pygame.display.flip()
+
     clock.tick(100)
