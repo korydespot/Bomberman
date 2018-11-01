@@ -1,3 +1,6 @@
+import server
+from twisted.internet.protocol import Factory
+from twisted.internet.protocol import ClientFactory
 try:
     import pygame
     pygame.init()
@@ -14,6 +17,18 @@ try:
     b = True
 except:
     print("----<error>-----\nProblem with imported modules\nModules|Imported\nrandom |"+str(a)+"\ntime   |"+str(b)+"\nPlease fix")
+
+# client networking
+
+class DataConnFactory(ClientFactory):
+	def __init__(self, server, player):
+		self.server = server
+		self.player = player
+
+	def buildProtocol(self, addr):
+		return DataConn(addr, self.server, self.player)
+
+
 
 class bomberguy(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -111,7 +126,7 @@ class gamef:
         snake.speed = 10
         snake.tailx = []
         snake.taily = []
-        snake.deaths +=1;
+        snake.deaths +=1
         time.sleep(0.5)
         snake.dire = 5
 
@@ -189,13 +204,13 @@ class gamef:
         if (snake.y+y)>= vr.gh-1:
             #print ("out of bounds")
             if(vr.wl):
-                snake.y = 1;
+                snake.y = 1
             else:
                 gamef.death()
         elif(snake.y+y)<= 0:
             #print ("out of bounds")
             if(vr.wl):
-                snake.y = vr.gh-2;
+                snake.y = vr.gh-2
             else:
                 gamef.death()
             
