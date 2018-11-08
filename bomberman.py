@@ -1,4 +1,4 @@
-import server
+#import server
 from twisted.internet.protocol import Factory
 from twisted.internet.protocol import ClientFactory
 try:
@@ -66,16 +66,16 @@ class Brick(pygame.sprite.Sprite):
     def __init__(self,x,y):
         super().__init__()
 
-        self.image = pygame.image.load("Brick.gif").convert_alpha()
+        self.image = pygame.image.load("Brick.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
 class vr:
     #grid width
-    gw = 20
+    gw = 15
     #grid height
-    gh = 20
+    gh = 15
     #square size
     pxl = 32
     #screen width
@@ -99,12 +99,17 @@ screen = pygame.display.set_mode((vr.sw, vr.sh))
 pygame.display.set_caption("Bomberman")
 #pressed = pygame.key.get_pressed()
 
-player1 = bomberguy(random.randint(1,vr.gw-2),random.randint(1,vr.gh-2))
+player1 = bomberguy(40,40)
+brick1 = Brick(64,64)
 all_sprites_list = pygame.sprite.Group()
 all_sprites_list.add(player1)
+all_sprites_list.add(brick1)
 
 
 c = 0
+bombs = []
+    
+
 
 class snake:
     ##x first then y
@@ -118,6 +123,9 @@ class snake:
     deaths = 0
 
 class gamef:
+    def __init__(self):
+        bombs = []
+
     def death():
         snake.leng = 4
         snake.x = random.randint(1,vr.gw-2)
@@ -158,16 +166,16 @@ class gamef:
     def keyd():
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_UP]:
-            player1.moveUp(20)
+            player1.moveUp(32)
         if pressed[pygame.K_RIGHT]:
-            player1.moveRight(20)
+            player1.moveRight(32)
         if pressed[pygame.K_DOWN]:
-            player1.moveDown(20)
+            player1.moveDown(32)
         if pressed[pygame.K_LEFT]:
-            player1.moveLeft(20)
+            player1.moveLeft(32)
         if pressed[pygame.K_SPACE]:
-            bomb1 = bomb(player1.get_x(),player1.get_y())
-            all_sprites_list.add(bomb1)
+            bombs.append(bomb(player1.get_x(),player1.get_y()))
+            all_sprites_list.add(bombs)
     def ref():
         gamef.tails()
         if (snake.dire == 0):
@@ -246,10 +254,12 @@ while not vr.done:
             quit()
     
     gamef.grid()
-    gamef.keyd()
+    if(c > 5):
+        gamef.keyd()
+        c = 0
     c+=1
     gamef.draw()
-    if (c >= (100/snake.speed)):
+    if (c >= (1000/snake.speed)):
         gamef.ref()
         c=0
         #snake.speed+=1

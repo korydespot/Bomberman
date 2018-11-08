@@ -17,6 +17,7 @@ class GameServer(object):
         self.conn_queue = DeferredQueue()
         self.data_queue = DeferredQueue()
         self.playersConnected = 0
+	
 
         self.data_array = {'p1': [], 'p2': []}
         self.data_received = {'p1': False, 'p2': False}
@@ -61,7 +62,6 @@ class DataConn(LineReceiver):
 
 	def lineReceived(self, line):
 		"""Data received back from player"""
-		#print 'Received data from', self.player, line
 		self.server.data_array[self.player] = json.loads(line)
 		self.server.data_received[self.player] = True
 		if self.server.data_received['p1'] == self.server.data_received['p2'] == True:
@@ -79,3 +79,39 @@ class DataConn(LineReceiver):
 if __name__ == '__main__':
 	server = GameServer()
 	server.listen()
+
+
+class bomberguy(x,y):
+    def __init__(self,x,y):
+        super().__init__()
+        
+        self.rect.x = x
+        self.rect.y = y
+
+    def get_x(self):
+        return self.rect.x
+    def get_y(self):
+        return self.rect.y
+    def moveRight(self, pixels):
+        self.rect.x += pixels
+    def moveLeft(self, pixels):
+        self.rect.x -= pixels
+    def moveUp(self, pixels):
+        self.rect.y -= pixels
+    def moveDown(self, pixels):
+        self.rect.y += pixels
+        #pygame.draw.rect(self.image, [0,0,18,22])
+
+class bomb():
+    def __init__(self,x,y):
+        super().__init__()
+
+        self.x = x
+        self.y = y
+
+class Brick():
+    def __init__(self,x,y):
+        super().__init__()
+
+        self.x = x
+        self.y = y
