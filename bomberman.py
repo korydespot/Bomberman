@@ -61,6 +61,8 @@ class bomb(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.timer =  pygame.time.get_ticks()
+
 
 class Brick(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -70,6 +72,14 @@ class Brick(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+def CheckBomb(bombs):
+    y = ()
+    for x in bombs:
+        t = y - x.timer
+        if (t >= 20.0):
+            all_sprites_list.remove(x)
+        
 
 class vr:
     #grid width
@@ -254,6 +264,7 @@ while not vr.done:
             quit()
     
     gamef.grid()
+    CheckBomb(bombs)
     if(c > 5):
         gamef.keyd()
         c = 0
