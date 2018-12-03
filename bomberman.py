@@ -1,6 +1,16 @@
+import sys
+if getattr(sys, 'frozen', False):
+    os.chdir(sys._MEIPASS)
+
 import server
 from twisted.internet.protocol import Factory
 from twisted.internet.protocol import ClientFactory
+from twisted.internet.protocol import Protocol
+from twisted.internet import reactor
+from twisted.internet.task import LoopingCall
+
+import json
+
 try:
     import pygame
     pygame.init()
@@ -19,15 +29,38 @@ except:
     print("----<error>-----\nProblem with imported modules\nModules|Imported\nrandom |"+str(a)+"\ntime   |"+str(b)+"\nPlease fix")
 
 # client networking
+class DataConn(Protocol):
+    """Once connected, send a message, then print the result."""    
+    def connectionMade(self):
+        #self.transport.write(b"hello, world!")
+        pass
+    
+    def dataReceived(self, data):
+        #print("Server said:", data)
+        d = data.decode()
+        if (d=='update'):
+            clientInfo={
+                'x':player1.rect.x,
+                'y':player1.rect.y,
+            }
+            self.transport.write(json.dumps(clientInfo).encode())
+    
+    def connectionLost(self, reason):
+        print("connection lost")
 
 class DataConnFactory(ClientFactory):
-	def __init__(self, server, player):
-		self.server = server
-		self.player = player
+    #def __init__(self, server, player):
+    #	self.server = server
+    #	self.player = player
 
-	def buildProtocol(self, addr):
-		return DataConn(addr, self.server, self.player)
-
+    protocol = DataConn
+    def clientConnectionFailed(self, connector, reason):
+        print("Connection failed - goodbye!")
+        reactor.stop()
+        
+    def clientConnectionLost(self, connector, reason):
+        print("Connection lost - goodbye!")
+        reactor.stop()
 
 
 class bomberguy(pygame.sprite.Sprite):
@@ -91,21 +124,6 @@ class vr:
     #is the game over
     done = False
 
-vr.sw = vr.gw*vr.pxl
-vr.sh = vr.gh*vr.pxl
-#setup
-clock = pygame.time.Clock()
-screen = pygame.display.set_mode((vr.sw, vr.sh))
-pygame.display.set_caption("Bomberman")
-#pressed = pygame.key.get_pressed()
-
-player1 = bomberguy(random.randint(1,vr.gw-2),random.randint(1,vr.gh-2))
-all_sprites_list = pygame.sprite.Group()
-all_sprites_list.add(player1)
-
-
-c = 0
-
 class snake:
     ##x first then y
     leng = 4
@@ -158,13 +176,13 @@ class gamef:
     def keyd():
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_UP]:
-            player1.moveUp(20)
+            player1.moveUp(vr.pxl)
         if pressed[pygame.K_RIGHT]:
-            player1.moveRight(20)
+            player1.moveRight(vr.pxl)
         if pressed[pygame.K_DOWN]:
-            player1.moveDown(20)
+            player1.moveDown(vr.pxl)
         if pressed[pygame.K_LEFT]:
-            player1.moveLeft(20)
+            player1.moveLeft(vr.pxl)
         if pressed[pygame.K_SPACE]:
             bomb1 = bomb(player1.get_x(),player1.get_y())
             all_sprites_list.add(bomb1)
@@ -236,9 +254,9 @@ class gamef:
         if (len(snake.tailx) > snake.leng):
             snake.tailx.pop(0)
             snake.taily.pop(0)
-        
-        
-while not vr.done:
+
+def gameLoop():
+    global c
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             vr.done = True
@@ -246,13 +264,31 @@ while not vr.done:
             quit()
     
     gamef.grid()
-    gamef.keyd()
-    c+=1
     gamef.draw()
-    if (c >= (100/snake.speed)):
-        gamef.ref()
+
+    c+=1
+    if (c >= 10):
+        gamef.keyd()
         c=0
         #snake.speed+=1
     pygame.display.flip()
 
-    clock.tick(100)
+    #clock.tick(100)
+
+vr.sw = vr.gw*vr.pxl
+vr.sh = vr.gh*vr.pxl
+#setup
+clock = pygame.time.Clock()
+screen = pygame.display.set_mode((vr.sw, vr.sh))
+pygame.display.set_caption("Bomberman")
+#pressed = pygame.key.get_pressed()
+
+player1 = bomberguy(random.randint(1,vr.gw-2),random.randint(1,vr.gh-2))
+all_sprites_list = pygame.sprite.Group()
+all_sprites_list.add(player1)
+c = 0
+
+reactor.connectTCP("localhost",40060,DataConnFactory())
+LoopingCall(gameLoop).start(1/100)
+reactor.run()
+pygame.quit()
