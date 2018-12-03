@@ -2,7 +2,6 @@ import sys
 if getattr(sys, 'frozen', False):
     os.chdir(sys._MEIPASS)
 
-import server
 from twisted.internet.protocol import Factory
 from twisted.internet.protocol import ClientFactory
 from twisted.internet.protocol import Protocol
