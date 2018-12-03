@@ -10,12 +10,7 @@ from twisted.protocols.basic import LineReceiver
 from twisted.internet.tcp import Port
 from twisted.internet import reactor
 from twisted.internet.defer import DeferredQueue
-from twisted.internet.defer import Deferred
 
-def errhandle(signum, stackframe):
-    print("reactor stopped")
-    reactor.callFromThread(reactor.stop)
-        
 class GameServer(object):
     def __init__(self):
         self.port1 = 40060
@@ -29,15 +24,10 @@ class GameServer(object):
         self.data_array = {'p1': [], 'p2': []}
         self.data_received = {'p1': False, 'p2': False}
 
-        
     def listen(self):
         reactor.listenTCP(self.port1, CConnFactory(self, 1))
         reactor.listenTCP(self.port2, CConnFactory(self, 2))
-        signal.signal(signal.SIGINT, errhandle)
         reactor.run()
-
-
-    
 
 class CConn(Protocol):
     def __init__(self, addr, server, player):
@@ -102,6 +92,42 @@ class DataConn(LineReceiver):
         self.server.data_received[self.player] = False
 
 
-    if __name__ == '__main__':
-        server = GameServer()
-        server.listen()
+if __name__ == '__main__':
+	server = GameServer()
+	server.listen()
+
+
+class bomberguy(x,y):
+    def __init__(self,x,y):
+        super().__init__()
+        
+        self.rect.x = x
+        self.rect.y = y
+
+    def get_x(self):
+        return self.rect.x
+    def get_y(self):
+        return self.rect.y
+    def moveRight(self, pixels):
+        self.rect.x += pixels
+    def moveLeft(self, pixels):
+        self.rect.x -= pixels
+    def moveUp(self, pixels):
+        self.rect.y -= pixels
+    def moveDown(self, pixels):
+        self.rect.y += pixels
+        #pygame.draw.rect(self.image, [0,0,18,22])
+
+class bomb():
+    def __init__(self,x,y):
+        super().__init__()
+
+        self.x = x
+        self.y = y
+
+class Brick():
+    def __init__(self,x,y):
+        super().__init__()
+
+        self.x = x
+        self.y = y
