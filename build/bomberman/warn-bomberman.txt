@@ -1,0 +1,82 @@
+
+This file lists modules PyInstaller was not able to find. This does not
+necessarily mean this module is required for running you program. Python and
+Python 3rd-party packages include a lot of conditional or optional module. For
+example the module 'ntpath' only exists on Windows, whereas the module
+'posixpath' only exists on Posix systems.
+
+Types if import:
+* top-level: imported at the top-level - look at these first
+* conditional: imported within an if-statement
+* delayed: imported from within a function
+* optional: imported within a try-except-statement
+
+IMPORTANT: Do NOT post this list to the issue-tracker. Use it as a basis for
+           yourself tracking down the missing module. Thanks!
+
+missing module named multiprocessing.set_start_method - imported by multiprocessing (top-level), multiprocessing.spawn (top-level)
+missing module named multiprocessing.get_start_method - imported by multiprocessing (top-level), multiprocessing.spawn (top-level)
+missing module named multiprocessing.TimeoutError - imported by multiprocessing (top-level), multiprocessing.pool (top-level)
+missing module named multiprocessing.get_context - imported by multiprocessing (top-level), multiprocessing.pool (top-level), multiprocessing.managers (top-level), multiprocessing.sharedctypes (top-level)
+missing module named multiprocessing.BufferTooShort - imported by multiprocessing (top-level), multiprocessing.connection (top-level)
+missing module named multiprocessing.AuthenticationError - imported by multiprocessing (top-level), multiprocessing.connection (top-level)
+missing module named cookielib - imported by twisted.python.compat (conditional)
+missing module named urllib.unquote - imported by urllib (conditional), twisted.python.compat (conditional)
+missing module named urllib.quote - imported by urllib (conditional), twisted.python.compat (conditional)
+missing module named urlparse - imported by twisted.python.compat (conditional)
+missing module named StringIO - imported by twisted.python.compat (delayed, conditional), pkg_resources._vendor.six (conditional)
+missing module named cStringIO - imported by twisted.python.compat (delayed, conditional), twisted.python.util (delayed), pygame.compat (conditional)
+missing module named copy_reg - imported by cStringIO (top-level), pygame (conditional)
+missing module named _overlapped - imported by asyncio.windows_events (top-level)
+missing module named asyncio.DefaultEventLoopPolicy - imported by asyncio (delayed, conditional), asyncio.events (delayed, conditional)
+missing module named netbios - imported by uuid (delayed)
+missing module named win32wnet - imported by uuid (delayed)
+missing module named pywintypes - imported by twisted.python.lockfile (conditional, optional), twisted.internet._dumbwin32proc (top-level), twisted.internet._pollingfile (top-level)
+missing module named win32api - imported by twisted.python.win32 (delayed, optional), twisted.python.lockfile (conditional, optional), twisted.internet._dumbwin32proc (top-level), twisted.internet._pollingfile (top-level), pkg_resources._vendor.appdirs (delayed, conditional, optional)
+missing module named UserDict - imported by attr._compat (conditional)
+missing module named Queue - imported by twisted.internet.threads (conditional), twisted._threads._pool (optional), pygame.threads (conditional)
+missing module named win32gui - imported by twisted.internet.win32eventreactor (top-level)
+missing module named win32event - imported by twisted.internet._dumbwin32proc (top-level), twisted.internet.win32eventreactor (top-level)
+missing module named win32file - imported by twisted.internet._dumbwin32proc (top-level), twisted.internet._pollingfile (top-level), twisted.internet.win32eventreactor (top-level)
+missing module named 'twisted.python._sendmsg' - imported by twisted.python.sendmsg (conditional)
+missing module named win32security - imported by twisted.internet._dumbwin32proc (top-level)
+missing module named win32pipe - imported by twisted.internet._dumbwin32proc (top-level), twisted.internet._pollingfile (top-level)
+missing module named win32con - imported by twisted.internet._dumbwin32proc (top-level)
+missing module named win32process - imported by twisted.internet.posixbase (conditional, optional), twisted.internet._dumbwin32proc (top-level)
+missing module named __builtin__ - imported by twisted.internet.abstract (conditional), pkg_resources._vendor.pyparsing (conditional)
+missing module named 'service_identity.pyopenssl' - imported by twisted.internet._sslverify (delayed, optional)
+missing module named service_identity - imported by twisted.internet._sslverify (delayed, optional)
+missing module named 'OpenSSL._util' - imported by twisted.internet._sslverify (top-level)
+missing module named OpenSSL - imported by twisted.protocols.tls (top-level), twisted.internet._sslverify (top-level), twisted.internet.ssl (top-level)
+missing module named 'OpenSSL.SSL' - imported by twisted.protocols.tls (top-level)
+missing module named 'multiprocessing.forking' - imported by /Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/PyInstaller/loader/rthooks/pyi_rth_multiprocessing.py (optional)
+missing module named pyimod03_importers - imported by /Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/PyInstaller/loader/rthooks/pyi_rth_pkgres.py (top-level)
+missing module named ordereddict - imported by pkg_resources._vendor.pyparsing (optional)
+missing module named 'win32com.shell' - imported by pkg_resources._vendor.appdirs (conditional, optional)
+missing module named 'com.sun' - imported by pkg_resources._vendor.appdirs (delayed, conditional, optional)
+missing module named com - imported by pkg_resources._vendor.appdirs (delayed)
+missing module named win32com - imported by pkg_resources._vendor.appdirs (delayed)
+missing module named 'pkg_resources.extern.pyparsing' - imported by pkg_resources._vendor.packaging.markers (top-level), pkg_resources._vendor.packaging.requirements (top-level)
+missing module named __main__ - imported by pkg_resources (delayed, optional)
+missing module named pkg_resources.extern.packaging - imported by pkg_resources.extern (top-level), pkg_resources (top-level)
+missing module named pkg_resources.extern.appdirs - imported by pkg_resources.extern (top-level), pkg_resources (top-level)
+missing module named 'pkg_resources.extern.six.moves' - imported by pkg_resources (top-level), pkg_resources._vendor.packaging.requirements (top-level)
+missing module named pkg_resources.extern.six - imported by pkg_resources.extern (top-level), pkg_resources (top-level)
+missing module named org - imported by pickle (optional), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level)
+excluded module named _frozen_importlib - imported by importlib (optional), importlib.abc (optional), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level)
+missing module named _frozen_importlib_external - imported by importlib._bootstrap (delayed), importlib (optional), importlib.abc (optional), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level)
+missing module named _winreg - imported by platform (delayed, optional), pygame (conditional), pygame.sysfont (conditional), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level), pkg_resources._vendor.appdirs (delayed)
+missing module named java - imported by platform (delayed), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level)
+missing module named 'java.lang' - imported by platform (delayed, optional), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level), xml.sax._exceptions (conditional)
+missing module named vms_lib - imported by platform (delayed, conditional, optional), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level)
+missing module named winreg - imported by platform (delayed, optional), mimetypes (optional), urllib.request (delayed, conditional, optional), pygame.sysfont (conditional), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level)
+missing module named nt - imported by os (conditional, optional), ntpath (conditional, optional), shutil (conditional), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level)
+missing module named msvcrt - imported by subprocess (conditional), multiprocessing.spawn (delayed, conditional), multiprocessing.popen_spawn_win32 (top-level), getpass (optional), asyncio.windows_events (top-level), asyncio.windows_utils (top-level), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level)
+missing module named _winapi - imported by encodings (delayed, conditional, optional), subprocess (conditional), multiprocessing.reduction (conditional), multiprocessing.connection (optional), multiprocessing.heap (conditional), multiprocessing.popen_spawn_win32 (top-level), asyncio.windows_events (top-level), asyncio.windows_utils (top-level), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level)
+missing module named 'org.python' - imported by copy (optional), /Users/Taylor/Development/GitHub/Bomberman/bomberman.py (top-level), xml.sax (delayed, conditional)
+missing module named 'pygame._view' - imported by pygame (delayed)
+missing module named OpenGL - imported by pygame (delayed)
+missing module named numpy - imported by pygame._numpysurfarray (top-level), pygame._numpysndarray (top-level), pygame (delayed)
+missing module named 'pygame.movie' - imported by pygame (optional)
+missing module named pygame.SRCALPHA - imported by pygame (top-level), pygame.ftfont (top-level)
+missing module named Py25Queue - imported by pygame.threads (conditional)

@@ -1,6 +1,16 @@
-#import server
+import sys
+if getattr(sys, 'frozen', False):
+    os.chdir(sys._MEIPASS)
+
+import server
 from twisted.internet.protocol import Factory
 from twisted.internet.protocol import ClientFactory
+from twisted.internet.protocol import Protocol
+from twisted.internet import reactor
+from twisted.internet.task import LoopingCall
+
+import json
+
 try:
     import pygame
     pygame.init()
@@ -19,15 +29,38 @@ except:
     print("----<error>-----\nProblem with imported modules\nModules|Imported\nrandom |"+str(a)+"\ntime   |"+str(b)+"\nPlease fix")
 
 # client networking
+class DataConn(Protocol):
+    """Once connected, send a message, then print the result."""    
+    def connectionMade(self):
+        #self.transport.write(b"hello, world!")
+        pass
+    
+    def dataReceived(self, data):
+        #print("Server said:", data)
+        d = data.decode()
+        if (d=='update'):
+            clientInfo={
+                'x':player1.rect.x,
+                'y':player1.rect.y,
+            }
+            self.transport.write(json.dumps(clientInfo).encode())
+    
+    def connectionLost(self, reason):
+        print("connection lost")
 
 class DataConnFactory(ClientFactory):
-	def __init__(self, server, player):
-		self.server = server
-		self.player = player
+    #def __init__(self, server, player):
+    #	self.server = server
+    #	self.player = player
 
-	def buildProtocol(self, addr):
-		return DataConn(addr, self.server, self.player)
-
+    protocol = DataConn
+    def clientConnectionFailed(self, connector, reason):
+        print("Connection failed - goodbye!")
+        reactor.stop()
+        
+    def clientConnectionLost(self, connector, reason):
+        print("Connection lost - goodbye!")
+        reactor.stop()
 
 
 class bomberguy(pygame.sprite.Sprite):
@@ -100,26 +133,6 @@ class vr:
     coloroffset = 8
     #is the game over
     done = False
-
-vr.sw = vr.gw*vr.pxl
-vr.sh = vr.gh*vr.pxl
-#setup
-clock = pygame.time.Clock()
-screen = pygame.display.set_mode((vr.sw, vr.sh))
-pygame.display.set_caption("Bomberman")
-#pressed = pygame.key.get_pressed()
-
-player1 = bomberguy(40,40)
-brick1 = Brick(64,64)
-all_sprites_list = pygame.sprite.Group()
-all_sprites_list.add(player1)
-all_sprites_list.add(brick1)
-
-
-c = 0
-bombs = []
-    
-
 
 class snake:
     ##x first then y
@@ -254,9 +267,9 @@ class gamef:
         if (len(snake.tailx) > snake.leng):
             snake.tailx.pop(0)
             snake.taily.pop(0)
-        
-        
-while not vr.done:
+
+def gameLoop():
+    global c
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             vr.done = True
@@ -276,4 +289,27 @@ while not vr.done:
         #snake.speed+=1
     pygame.display.flip()
 
-    clock.tick(100)
+    #clock.tick(100)
+
+
+vr.sw = vr.gw*vr.pxl
+vr.sh = vr.gh*vr.pxl
+#setup
+clock = pygame.time.Clock()
+screen = pygame.display.set_mode((vr.sw, vr.sh))
+pygame.display.set_caption("Bomberman")
+#pressed = pygame.key.get_pressed()
+
+player1 = bomberguy(40,40)
+brick1 = Brick(64,64)
+all_sprites_list = pygame.sprite.Group()
+all_sprites_list.add(player1)
+all_sprites_list.add(brick1)
+
+c = 0
+bombs = []    
+
+reactor.connectTCP("localhost",40060,DataConnFactory())
+LoopingCall(gameLoop).start(1/100)
+reactor.run()
+pygame.quit()
