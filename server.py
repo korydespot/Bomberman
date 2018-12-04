@@ -11,6 +11,55 @@ from twisted.internet.tcp import Port
 from twisted.internet import reactor
 from twisted.internet.defer import DeferredQueue
 
+
+class bomberguy():
+    def __init__(self,x,y):
+        super().__init__()
+
+       
+        self.x = x
+        self.y = y
+    def get_x(self):
+        return self.x
+    def get_y(self):
+        return self.y
+   
+    def moveRight(self, pixels):
+        self.x += pixels
+    def moveLeft(self, pixels):
+        self.x -= pixels
+    def moveUp(self, pixels):
+        self.y -= pixels
+    def moveDown(self, pixels):
+        self.y += pixels
+
+class bomb():
+    def __init__(self,x,y):
+        super().__init__()
+
+        self.x = x
+        self.y = y
+
+class Brick():
+    def __init__(self,x,y):
+        super().__init__()
+
+        self.x = x
+        self.y = y
+
+player = bomberguy(40,40)
+def moveplayer(button):
+    if(button == "up"):
+        player.moveUp(30)
+    if(button == "left"):
+        player.moveLeft(30)
+    if(button == "down"):
+        player.moveDown(30)
+
+
+
+
+
 class GameServer(object):
     def __init__(self):
         self.port1 = 40060
@@ -48,9 +97,17 @@ class CConn(Protocol):
             self.server.conn_queue.put('Make data connection')
 
     def dataReceived(self,data):
-        print(json.loads(data.decode()))
-        time.sleep(5)
-        self.transport.write(b'update')
+        print(data.decode())
+        data.decode()
+
+        if(data[0]):
+            moveplayer(data[0])
+        serverInfo={
+                'x1':player.get_x(),
+                'y1':player.get_y()
+            }    
+        time.sleep(1)
+        self.transport.write(json.dumps(serverInfo).encode())
 
     def connectionLost(self, reason):
         print("Lost a client!")
@@ -97,37 +154,3 @@ if __name__ == '__main__':
 	server.listen()
 
 
-class bomberguy(x,y):
-    def __init__(self,x,y):
-        super().__init__()
-        
-        self.rect.x = x
-        self.rect.y = y
-
-    def get_x(self):
-        return self.rect.x
-    def get_y(self):
-        return self.rect.y
-    def moveRight(self, pixels):
-        self.rect.x += pixels
-    def moveLeft(self, pixels):
-        self.rect.x -= pixels
-    def moveUp(self, pixels):
-        self.rect.y -= pixels
-    def moveDown(self, pixels):
-        self.rect.y += pixels
-        #pygame.draw.rect(self.image, [0,0,18,22])
-
-class bomb():
-    def __init__(self,x,y):
-        super().__init__()
-
-        self.x = x
-        self.y = y
-
-class Brick():
-    def __init__(self,x,y):
-        super().__init__()
-
-        self.x = x
-        self.y = y

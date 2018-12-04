@@ -27,23 +27,47 @@ try:
 except:
     print("----<error>-----\nProblem with imported modules\nModules|Imported\nrandom |"+str(a)+"\ntime   |"+str(b)+"\nPlease fix")
 
+
+def keyd():
+        pressed = pygame.key.get_pressed()
+        if pressed[pygame.K_UP]:
+            return "up"
+        if pressed[pygame.K_RIGHT]:
+            return "right"
+        if pressed[pygame.K_DOWN]:
+            return "down"      
+        if pressed[pygame.K_LEFT]:
+            return "left"       
+        if pressed[pygame.K_SPACE]:
+            return "space"
+            
+
+
+
+
 # client networking
 class DataConn(Protocol):
     """Once connected, send a message, then print the result."""    
     def connectionMade(self):
         #self.transport.write(b"hello, world!")
         pass
-    
+
     def dataReceived(self, data):
         #print("Server said:", data)
-        d = data.decode()
-        if (d=='update'):
-            clientInfo={
-                'x':player1.rect.x,
-                'y':player1.rect.y,
-            }
-            self.transport.write(json.dumps(clientInfo).encode())
-    
+        data.decode()
+
+        if(data[0] and data[1]):
+            player1.rect.x = data[0]
+            player1.rect.y = data[1]
+
+        clientInfo={
+                #'x':player1.rect.x,
+                #'y':player1.rect.y,
+                'button':keyd()
+                }
+        #keypress = keyd()
+        self.transport.write(json.dumps(clientInfo).encode())
+
     def connectionLost(self, reason):
         print("connection lost")
 
@@ -56,7 +80,7 @@ class DataConnFactory(ClientFactory):
     def clientConnectionFailed(self, connector, reason):
         print("Connection failed - goodbye!")
         reactor.stop()
-        
+
     def clientConnectionLost(self, connector, reason):
         print("Connection lost - goodbye!")
         reactor.stop()
@@ -65,7 +89,7 @@ class DataConnFactory(ClientFactory):
 class bomberguy(pygame.sprite.Sprite):
     def __init__(self,x,y):
         super().__init__()
-        
+
         self.image = pygame.image.load("Bomberman.gif").convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -109,9 +133,9 @@ def CheckBomb(bombs):
     y = ()
     for x in bombs:
         t = y - x.timer
-        if (t >= 20.0):
+        if (t >= 2.0):
             all_sprites_list.remove(x)
-        
+
 
 class vr:
     #grid width
@@ -133,32 +157,9 @@ class vr:
     #is the game over
     done = False
 
-class snake:
-    ##x first then y
-    leng = 4
-    x = random.randint(1,vr.gw-2)
-    y = random.randint(1,vr.gh-2)
-    dire = 5
-    speed = 1
-    tailx = []
-    taily = []
-    deaths = 0
-
 class gamef:
     def __init__(self):
         bombs = []
-
-    def death():
-        snake.leng = 4
-        snake.x = random.randint(1,vr.gw-2)
-        snake.y = random.randint(1,vr.gh-2)
-        snake.dire = 5
-        snake.speed = 10
-        snake.tailx = []
-        snake.taily = []
-        snake.deaths +=1
-        time.sleep(0.5)
-        snake.dire = 5
 
     def grid():
         ty = False
@@ -169,7 +170,7 @@ class gamef:
                     of = 1
                 if (((x+of)%2)==0):
                     pygame.draw.rect(screen, (32,32,32),pygame.Rect(x*vr.pxl,y*vr.pxl,vr.pxl,vr.pxl))
-                    
+
                 else:
                     pygame.draw.rect(screen, (64,64,64),pygame.Rect(x*vr.pxl,y*vr.pxl,vr.pxl,vr.pxl))
                 ty = not ty
@@ -185,87 +186,7 @@ class gamef:
         color=(0,0,192)
         #pygame.draw.rect(screen, color, pygame.Rect(vr.pxl*snake.x,vr.pxl*snake.y, vr.pxl, vr.pxl))
         all_sprites_list.draw(screen)
-    def keyd():
-        pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_UP]:
-            player1.moveUp(32)
-        if pressed[pygame.K_RIGHT]:
-            player1.moveRight(32)
-        if pressed[pygame.K_DOWN]:
-            player1.moveDown(32)
-        if pressed[pygame.K_LEFT]:
-            player1.moveLeft(32)
-        if pressed[pygame.K_SPACE]:
-            bombs.append(bomb(player1.get_x(),player1.get_y()))
-            all_sprites_list.add(bombs)
-    def ref():
-        gamef.tails()
-        if (snake.dire == 0):
-            gamef.move(0,-1)
-            #snake.y -=1
-        elif (snake.dire == 1):
-            gamef.move(1,0)
-            #snake.x+=1
-        elif (snake.dire == 2):
-            #snake.y+=1
-            gamef.move(0,1)
-        elif (snake.dire == 3):
-            gamef.move(-1,0)
-            #snake.x-=1
-    def move(x,y):
-        #x check
-        if (snake.x+x)>= vr.gw-1:
-            if(vr.wl):
-                snake.x = 1;
-            else:
-                gamef.death()
-            #print ("out of bounds")
-            
-        elif(snake.x+x)<= 0:
-            #print ("out of bounds")
-            if(vr.wl):
-                snake.x = vr.gw-2;
-            else:
-                gamef.death()
-            
-        else:
-            snake.x+=x
-        #y check
-        if (snake.y+y)>= vr.gh-1:
-            #print ("out of bounds")
-            if(vr.wl):
-                snake.y = 1
-            else:
-                gamef.death()
-        elif(snake.y+y)<= 0:
-            #print ("out of bounds")
-            if(vr.wl):
-                snake.y = vr.gh-2
-            else:
-                gamef.death()
-            
-        else:
-            snake.y+=y
-        #apple
-        if (snake.x == apple.x) and (snake.y == apple.y):
-            snake.leng+=1
-            apple.lvl+=1
-            apple.x = random.randint(1,vr.gw-2)
-            apple.y = random.randint(1,vr.gh-2)
-            #print("Apple pos:\nX - "+str(apple.x)+"\nY - "+str(apple.y))
-        cdeaths = snake.deaths;
-        for i in range(len(snake.tailx)):
-            if(snake.deaths == cdeaths):
-                if (snake.x == snake.tailx[i]):
-                     if (snake.y == snake.taily[i]):
-                         #print("game over")
-                         gamef.death();
-    def tails():
-        snake.tailx.append(snake.x)
-        snake.taily.append(snake.y)
-        if (len(snake.tailx) > snake.leng):
-            snake.tailx.pop(0)
-            snake.taily.pop(0)
+
 
 def gameLoop():
     global c
@@ -274,18 +195,11 @@ def gameLoop():
             vr.done = True
             exit()
             quit()
-    
+
     gamef.grid()
     CheckBomb(bombs)
-    if(c > 5):
-        gamef.keyd()
-        c = 0
     c+=1
     gamef.draw()
-    if (c >= (1000/snake.speed)):
-        gamef.ref()
-        c=0
-        #snake.speed+=1
     pygame.display.flip()
 
     #clock.tick(100)
