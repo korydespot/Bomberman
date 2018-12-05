@@ -55,6 +55,8 @@ def moveplayer(button):
         player.moveLeft(30)
     if(button == "down"):
         player.moveDown(30)
+    else:
+        return
 
 
 
@@ -87,7 +89,8 @@ class CConn(Protocol):
     def connectionMade(self):
         print("Got new client!")
         self.server.playersConnected += 1
-        self.transport.write(b'update')
+        update = {'update':'true'}
+        self.transport.write(json.dumps(update).encode())
         return
         self.server.conn_queue.get().addCallback(self.tellPlayerAboutConn)
         if self.server.playersConnected == 2:
@@ -97,15 +100,17 @@ class CConn(Protocol):
             self.server.conn_queue.put('Make data connection')
 
     def dataReceived(self,data):
-        print(data.decode())
-        data.decode()
-
-        if(data[0]):
-            moveplayer(data[0])
+        s = data.decode()
+        d = json.loads(s)
+        print(d['x'])
+        s = data.decode()
+        d = json.load(s)
+        print(s[0])
+        moveplayer(d["button"])
         serverInfo={
                 'x1':player.get_x(),
                 'y1':player.get_y()
-            }    
+                }    
         time.sleep(1)
         self.transport.write(json.dumps(serverInfo).encode())
 

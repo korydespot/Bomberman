@@ -7,6 +7,7 @@ from twisted.internet.protocol import ClientFactory
 from twisted.internet.protocol import Protocol
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
+flag = 'true'
 
 import json
 
@@ -44,7 +45,6 @@ def keyd():
 
 
 
-
 # client networking
 class DataConn(Protocol):
     """Once connected, send a message, then print the result."""    
@@ -53,16 +53,17 @@ class DataConn(Protocol):
         pass
 
     def dataReceived(self, data):
-        #print("Server said:", data)
-        data.decode()
-
-        if(data[0] and data[1]):
-            player1.rect.x = data[0]
-            player1.rect.y = data[1]
-
+        print("Server said:", data)
+        s = data.decode()
+        d = json.loads(s)
+        if(d['update']):
+            player1.rect.x = d['x1']
+            player1.rect.y = d['y1']
+        else: 
+            flag = 'false'
         clientInfo={
-                #'x':player1.rect.x,
-                #'y':player1.rect.y,
+                'x1':player1.rect.x,
+                'y2':player1.rect.y,
                 'button':keyd()
                 }
         #keypress = keyd()
@@ -87,13 +88,16 @@ class DataConnFactory(ClientFactory):
 
 
 class bomberguy(pygame.sprite.Sprite):
+
     def __init__(self,x,y):
         super().__init__()
-
+        self.currentbomb = 1
+        self.maxbomb = 1
         self.image = pygame.image.load("Bomberman.gif").convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
 
     def get_x(self):
         return self.rect.x
@@ -110,15 +114,40 @@ class bomberguy(pygame.sprite.Sprite):
         #pygame.draw.rect(self.image, [0,0,18,22])
 
 class bomb(pygame.sprite.Sprite):
+
+
     def __init__(self,x,y):
         super().__init__()
-
+        self.fuse = 50
+        self.triggered = False
         self.image = pygame.image.load("Bomb.gif").convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.timer =  pygame.time.get_ticks()
+    def tick(self):
+        self.fuse -= 1
+        return self.fuse
+    def explode(self):
+        self.bomberguy.currentbomb += 1
 
+class exbomb(pygame.sprite.Sprite):
+
+
+    def __init__(self,x,y):
+        super().__init__()
+        self.fuse = 10
+        self.triggered = False
+        self.image = pygame.image.load("Bomb2.gif").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.timer = pygame.time.get_ticks()
+    def tick(self):
+        self.fuse -= 1
+        return self.fuse
+    def explode(self):
+        self.bomberguy.currentbomb += 1
 
 class Brick(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -129,12 +158,7 @@ class Brick(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-def CheckBomb(bombs):
-    y = ()
-    for x in bombs:
-        t = y - x.timer
-        if (t >= 2.0):
-            all_sprites_list.remove(x)
+
 
 
 class vr:
@@ -158,8 +182,44 @@ class vr:
     done = False
 
 class gamef:
-    def __init__(self):
-        bombs = []
+ 
+
+    def CheckBomb():
+        #print ("here")
+        for bomb in bombs:
+            if bomb.tick() < 0:
+                nexbomb = exbomb(bomb.rect.x,bomb.rect.y)
+                exbombs.append(nexbomb)
+                all_sprites_list.add(exbombs)
+                bombs.remove(bomb)
+                all_sprites_list.remove(bomb)
+        for wexbomb in exbombs:
+            if wexbomb.tick() < 0:
+                exbombs.remove(wexbomb)
+                all_sprites_list.remove(wexbomb)
+                
+
+    def activateBomb(self,bomb):
+        if not bomb.triggered:
+            bomb.explode()
+            self.bombs.remove(bomb)
+            explosion = pygame.image.load("bomb2.gif")
+
+    # just for testing the bomb
+    def keyd():
+        pressed = pygame.key.get_pressed()
+        if pressed[pygame.K_UP]:
+            player1.moveUp(32)
+        if pressed[pygame.K_RIGHT]:
+            player1.moveRight(32)
+        if pressed[pygame.K_DOWN]:
+            player1.moveDown(32)
+        if pressed[pygame.K_LEFT]:
+            player1.moveLeft(32)
+        if pressed[pygame.K_SPACE]:
+            nbomb = bomb(player1.get_x(),player1.get_y())
+            bombs.append(nbomb)
+            all_sprites_list.add(bombs)
 
     def grid():
         ty = False
@@ -197,7 +257,7 @@ def gameLoop():
             quit()
 
     gamef.grid()
-    CheckBomb(bombs)
+    gamef.CheckBomb()
     c+=1
     gamef.draw()
     pygame.display.flip()
@@ -212,17 +272,37 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((vr.sw, vr.sh))
 pygame.display.set_caption("Bomberman")
 #pressed = pygame.key.get_pressed()
-
+global player1
 player1 = bomberguy(40,40)
 brick1 = Brick(64,64)
+global all_sprites_list
 all_sprites_list = pygame.sprite.Group()
 all_sprites_list.add(player1)
 all_sprites_list.add(brick1)
 
 c = 0
+exbombs = []
 bombs = []    
+#reactor.connectTCP("localhost",40060,DataConnFactory())
+#LoopingCall(gameLoop).start(1/100)
+#reactor.run()
+#gameLoop()
+#pygame.quit()
 
-reactor.connectTCP("localhost",40060,DataConnFactory())
-LoopingCall(gameLoop).start(1/100)
-reactor.run()
+while not vr.done:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            vr.done = True
+            exit()
+            quit()
+    
+    gamef.grid()
+    if(c > 5):
+        gamef.keyd()
+        c = 0
+    c+=1
+    gamef.draw()
+    gamef.CheckBomb()
+    pygame.display.flip()
 pygame.quit()
+
