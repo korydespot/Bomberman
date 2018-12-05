@@ -53,22 +53,18 @@ class DataConn(Protocol):
         pass
 
     def dataReceived(self, data):
-        print("Server said:", data)
-        s = data.decode()
-        d = json.loads(s)
-        if(d['update']):
-            player1.rect.x = d['x1']
-            player1.rect.y = d['y1']
-        else: 
-            flag = 'false'
-        clientInfo={
-                'x1':player1.rect.x,
-                'y2':player1.rect.y,
-                'button':keyd()
-                }
-        #keypress = keyd()
-        self.transport.write(json.dumps(clientInfo).encode())
-
+        #print("Server said:", data)
+        action, data = json.loads(data.decode())
+        print(action)
+        if (action=='connected' or action=='update'):
+            clientInfo={
+                'x':player1.rect.x,
+                'y':player1.rect.y,
+            }
+            self.transport.write(json.dumps(clientInfo).encode())
+        else:
+            print(d)
+    
     def connectionLost(self, reason):
         print("connection lost")
 
@@ -255,11 +251,14 @@ def gameLoop():
             vr.done = True
             exit()
             quit()
-
+    
     gamef.grid()
-    gamef.CheckBomb()
+    if(c > 5):
+        gamef.keyd()
+        c = 0
     c+=1
     gamef.draw()
+    gamef.CheckBomb()
     pygame.display.flip()
 
     #clock.tick(100)
@@ -283,26 +282,10 @@ all_sprites_list.add(brick1)
 c = 0
 exbombs = []
 bombs = []    
-#reactor.connectTCP("localhost",40060,DataConnFactory())
-#LoopingCall(gameLoop).start(1/100)
-#reactor.run()
-#gameLoop()
-#pygame.quit()
-
-while not vr.done:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            vr.done = True
-            exit()
-            quit()
-    
-    gamef.grid()
-    if(c > 5):
-        gamef.keyd()
-        c = 0
-    c+=1
-    gamef.draw()
-    gamef.CheckBomb()
-    pygame.display.flip()
+reactor.connectTCP("localhost",40060,DataConnFactory())
+LoopingCall(gameLoop).start(1/100)
+reactor.run()
+gameLoop()
 pygame.quit()
+
 

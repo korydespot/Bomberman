@@ -65,71 +65,93 @@ def moveplayer(button):
 class GameServer(object):
     def __init__(self):
         self.port1 = 40060
-        self.port2 = 40061
-        self.dataport1 = 41060
-        self.dataport2 = 41061
-        self.conn_queue = DeferredQueue()
+        self.dataport = 41060
+        #self.conn_queue = DeferredQueue()
         self.data_queue = DeferredQueue()
         self.playersConnected = 0
+        self.playerCount = 0
+        self.lastSent = 0
 
-        self.data_array = {'p1': [], 'p2': []}
-        self.data_received = {'p1': False, 'p2': False}
+        self.data_array = {}
+        self.data_received = {}
 
     def listen(self):
-        reactor.listenTCP(self.port1, CConnFactory(self, 1))
-        reactor.listenTCP(self.port2, CConnFactory(self, 2))
+        print("Server Started.")
+        reactor.listenTCP(self.port1, CConnFactory(self))
         reactor.run()
 
+    def sendAll(self):
+        if all(self.data_received.values()):
+            print(self.data_array)
+            #    print("Data sent to p"+str(i+1))
+            elapsed = time.time()-self.lastSent
+            if(elapsed < 2):
+                reactor.callLater(2.1 - elapsed, self.sendAll)
+            else:
+                for i in range(self.playersConnected):
+                    self.data_queue.put(['update',self.data_array])
+                self.lastSent = time.time()
+
+class CConnFactory(Factory):
+    def __init__(self, server):
+        self.server = server        
+        
+    def buildProtocol(self, addr):
+        return CConn(addr, self.server)
+    
 class CConn(Protocol):
-    def __init__(self, addr, server, player):
+    def __init__(self, addr, server):
         self.addr = addr
         self.server = server
-        self.player = player
-
+        self.server.playersConnected += 1
+        self.player = server.playersConnected
+        
     def connectionMade(self):
         print("Got new client!")
-        self.server.playersConnected += 1
-        update = {'update':'true'}
-        self.transport.write(json.dumps(update).encode())
-        return
-        self.server.conn_queue.get().addCallback(self.tellPlayerAboutConn)
-        if self.server.playersConnected == 2:
-            reactor.listenTCP(self.server.dataport1, DataConnFactory(self.server, 1))
-            reactor.listenTCP(self.server.dataport2, DataConnFactory(self.server, 2))
-            self.transport.write('Make data connection')
-            self.server.conn_queue.put('Make data connection')
+        server.data_array[self.player]=[]
+        server.data_received[self.player]=False
+
+        self.transport.write(json.dumps(('connected',None)).encode())
+        #self.transport.write(b'update')
+
+        #self.server.conn_queue.get().addCallback(self.tellPlayerAboutConn)
+        #if self.server.playersConnected == 2:
+        #    reactor.listenTCP(self.server.dataport1, DataConnFactory(self.server, 1))
+        #    reactor.listenTCP(self.server.dataport2, DataConnFactory(self.server, 2))
+        #    self.transport.write('Make data connection')
+        #    self.server.conn_queue.put('Make data connection')
 
     def dataReceived(self,data):
-        s = data.decode()
-        d = json.loads(s)
-        print(d['x'])
-        s = data.decode()
-        d = json.load(s)
-        print(s[0])
-        moveplayer(d["button"])
-        serverInfo={
-                'x1':player.get_x(),
-                'y1':player.get_y()
-                }    
-        time.sleep(1)
-        self.transport.write(json.dumps(serverInfo).encode())
+        if not self.server.data_received[self.player]:
+            self.server.data_array[self.player] = json.loads(data)
+            self.server.data_received[self.player] = True
+            self.server.data_queue.get().addCallback(self.sendToPlayer)
+            self.server.sendAll()
+                
+
+    def sendToPlayer(self, data):
+        #print 'Sending array to both players'
+        print("Data sent to p"+str(self.player))
+        self.transport.write(json.dumps(data).encode())
+        self.server.data_received[self.player] = False
+        return data
 
     def connectionLost(self, reason):
         print("Lost a client!")
-        self.factory.clients.remove(self)
+        self.server.data_array.pop(self.player)
+        self.server.data_received.pop(self.player)
+        self.server.playersConnected-=1
+        #self.factory.clients.remove(self)
 
-    def tellPlayerAboutConn(self, data):
-        self.transport.write(data)
 
-    
 
-class CConnFactory(Factory):
+class DataFactory(Factory):
     def __init__(self, server, player):
         self.server = server
         self.player = player
 
     def buildProtocol(self, addr):
-        return CConn(addr, self.server, self.player)
+        return DataConn(addr, self.server, self.player)
 
 class DataConn(LineReceiver):
     def __init__(self, addr, server, player):
