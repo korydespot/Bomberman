@@ -129,7 +129,7 @@ class CConn(Protocol):
             self.server.data_received[self.player] = True
             self.server.data_queue.get().addCallback(self.sendToPlayer)
             self.server.sendAll()
-                
+                 
 
     def sendToPlayer(self, data):
         #print 'Sending array to both players'

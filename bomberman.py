@@ -10,6 +10,7 @@ from twisted.internet.task import LoopingCall
 flag = 'true'
 import json
 
+
 try:
     import pygame
     pygame.init()
@@ -46,6 +47,9 @@ def keyd():
 
 # client networking
 class DataConn(Protocol):
+
+    global spaced
+
     """Once connected, send a message, then print the result."""    
     def connectionMade(self):
         #self.transport.write(b"hello, world!")
@@ -55,10 +59,15 @@ class DataConn(Protocol):
         #print("Server said:", data)
         action, data = json.loads(data.decode())
         print(action)
+        global spaced
+
         clientInfo={
             'x':player.rect.x,
             'y':player.rect.y,
+            'bomb':spaced
         }
+        if(spaced):
+            spaced = 'false'
         if action=='connected':
             player.myid = data
             print(data)
@@ -70,6 +79,10 @@ class DataConn(Protocol):
                 if int(p)!=player.myid:
                     pdata = data[p]
                     newguy=bomberguy(pdata['x'],pdata['y'])
+                    if(pdata['bomb'] == 'true'):
+                        newbomb = bomb(pdata['x'],pdata['y'])
+                        bombs.append(newbomb)
+                        all_sprites_list.add(bombs)
                     players.append(newguy)
                     all_sprites_list.add(newguy)
             self.transport.write(json.dumps(clientInfo).encode())
@@ -194,7 +207,7 @@ class vr:
 
 class gamef:
  
-
+    global spaced
     def CheckBomb():
         #print ("here")
         for bomb in bombs:
@@ -218,6 +231,7 @@ class gamef:
 
     # just for testing the bomb
     def keyd():
+        global spaced
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_UP]:
             player.moveUp(32)
@@ -228,6 +242,7 @@ class gamef:
         if pressed[pygame.K_LEFT]:
             player.moveLeft(32)
         if pressed[pygame.K_SPACE]:
+            spaced = 'true'
             nbomb = bomb(player.get_x(),player.get_y())
             bombs.append(nbomb)
             all_sprites_list.add(bombs)
@@ -257,7 +272,8 @@ class gamef:
         color=(0,0,192)
         #pygame.draw.rect(screen, color, pygame.Rect(vr.pxl*snake.x,vr.pxl*snake.y, vr.pxl, vr.pxl))
         all_sprites_list.draw(screen)
-
+global spaced
+spaced = 'false'
 
 def gameLoop():
     global c
