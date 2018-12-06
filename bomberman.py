@@ -8,7 +8,6 @@ from twisted.internet.protocol import Protocol
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
 flag = 'true'
-
 import json
 
 try:
@@ -56,11 +55,23 @@ class DataConn(Protocol):
         #print("Server said:", data)
         action, data = json.loads(data.decode())
         print(action)
-        if (action=='connected' or action=='update'):
-            clientInfo={
-                'x':player1.rect.x,
-                'y':player1.rect.y,
-            }
+        clientInfo={
+            'x':player.rect.x,
+            'y':player.rect.y,
+        }
+        if action=='connected':
+            player.myid = data
+            print(data)
+            self.transport.write(json.dumps(clientInfo).encode())
+        elif action=='update':
+            while players:
+                all_sprites_list.remove(players.pop())
+            for p in data:
+                if int(p)!=player.myid:
+                    pdata = data[p]
+                    newguy=bomberguy(pdata['x'],pdata['y'])
+                    players.append(newguy)
+                    all_sprites_list.add(newguy)
             self.transport.write(json.dumps(clientInfo).encode())
         else:
             print(d)
@@ -99,6 +110,10 @@ class bomberguy(pygame.sprite.Sprite):
         return self.rect.x
     def get_y(self):
         return self.rect.y
+    def set_x(self,x):
+        self.rect.x=x
+    def set_y(self,y):
+        self.rect.y=y
     def moveRight(self, pixels):
         self.rect.x += pixels
     def moveLeft(self, pixels):
@@ -184,7 +199,6 @@ class gamef:
         #print ("here")
         for bomb in bombs:
             if bomb.tick() < 0:
-                player1.currentbomb -= 1
                 nexbomb = exbomb(bomb.rect.x,bomb.rect.y)
                 exbombs.append(nexbomb)
                 all_sprites_list.add(exbombs)
@@ -206,19 +220,17 @@ class gamef:
     def keyd():
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_UP]:
-            player1.moveUp(32)
+            player.moveUp(32)
         if pressed[pygame.K_RIGHT]:
-            player1.moveRight(32)
+            player.moveRight(32)
         if pressed[pygame.K_DOWN]:
-            player1.moveDown(32)
+            player.moveDown(32)
         if pressed[pygame.K_LEFT]:
-            player1.moveLeft(32)
+            player.moveLeft(32)
         if pressed[pygame.K_SPACE]:
-            if (player1.maxbomb >= player1.currentbomb):
-                nbomb = bomb(player1.get_x(),player1.get_y())
-                bombs.append(nbomb)
-                all_sprites_list.add(bombs)
-                player1.currentbomb += 1
+            nbomb = bomb(player.get_x(),player.get_y())
+            bombs.append(nbomb)
+            all_sprites_list.add(bombs)
 
     def grid():
         ty = False
@@ -274,12 +286,13 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((vr.sw, vr.sh))
 pygame.display.set_caption("Bomberman")
 #pressed = pygame.key.get_pressed()
-global player1
-player1 = bomberguy(40,40)
+global player
+player = bomberguy(40,40)
+players=[]
 brick1 = Brick(64,64)
 global all_sprites_list
 all_sprites_list = pygame.sprite.Group()
-all_sprites_list.add(player1)
+all_sprites_list.add(player)
 all_sprites_list.add(brick1)
 
 c = 0

@@ -81,12 +81,13 @@ class GameServer(object):
         reactor.run()
 
     def sendAll(self):
+        delay=0
         if all(self.data_received.values()):
             print(self.data_array)
             #    print("Data sent to p"+str(i+1))
             elapsed = time.time()-self.lastSent
-            if(elapsed < 2):
-                reactor.callLater(2.1 - elapsed, self.sendAll)
+            if(elapsed < delay):
+                reactor.callLater(delay - elapsed, self.sendAll)
             else:
                 for i in range(self.playersConnected):
                     self.data_queue.put(['update',self.data_array])
@@ -104,14 +105,15 @@ class CConn(Protocol):
         self.addr = addr
         self.server = server
         self.server.playersConnected += 1
-        self.player = server.playersConnected
+        self.server.playerCount += 1
+        self.player = server.playerCount
         
     def connectionMade(self):
         print("Got new client!")
         server.data_array[self.player]=[]
         server.data_received[self.player]=False
 
-        self.transport.write(json.dumps(('connected',None)).encode())
+        self.transport.write(json.dumps(('connected',self.player)).encode())
         #self.transport.write(b'update')
 
         #self.server.conn_queue.get().addCallback(self.tellPlayerAboutConn)
