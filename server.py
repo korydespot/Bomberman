@@ -89,6 +89,7 @@ class GameServer(object):
             if(elapsed < delay):
                 reactor.callLater(delay - elapsed, self.sendAll)
             else:
+                latency.setdefault(self.playersConnected,[]).append(elapsed)
                 for i in range(self.playersConnected):
                     self.data_queue.put(['update',self.data_array])
                 self.lastSent = time.time()
@@ -177,9 +178,20 @@ class DataConn(LineReceiver):
         self.sendLine(json.dumps(data))
         self.server.data_received[self.player] = False
 
+latency={}
+orig_handler = signal.getsignal(signal.SIGINT)
 
+def logg(sig, err):
+    log=open('data.csv','w')
+    for i in latency:
+        log.write(",".join([str(j) for j in latency[i]])+'\n')
+    log.close()
+    reactor.stop()
+    orig_handler(sig,err)
+    
 if __name__ == '__main__':
-	server = GameServer()
-	server.listen()
+    signal.signal(signal.SIGINT,logg)
+    server = GameServer()
+    server.listen()
 
 

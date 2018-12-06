@@ -6,7 +6,13 @@ block_cipher = None
 a = Analysis(['bomberman.py'],
              pathex=['/Users/Taylor/Development/GitHub/Bomberman'],
              binaries=[],
-             datas=[('Bomberman.gif','.'),('Brick.png','.')],
+             datas=[
+                 ('Bomberman.gif','.'),
+                 ('Brick.png','.'),
+                 ('Bomb.gif','.'),
+                 ('Bomb2.gif','.'),
+                 ('Bomb3.gif','.')
+             ],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
