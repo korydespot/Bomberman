@@ -184,6 +184,7 @@ class gamef:
         #print ("here")
         for bomb in bombs:
             if bomb.tick() < 0:
+                player1.currentbomb -= 1
                 nexbomb = exbomb(bomb.rect.x,bomb.rect.y)
                 exbombs.append(nexbomb)
                 all_sprites_list.add(exbombs)
@@ -213,9 +214,11 @@ class gamef:
         if pressed[pygame.K_LEFT]:
             player1.moveLeft(32)
         if pressed[pygame.K_SPACE]:
-            nbomb = bomb(player1.get_x(),player1.get_y())
-            bombs.append(nbomb)
-            all_sprites_list.add(bombs)
+            if (player1.maxbomb >= player1.currentbomb):
+                nbomb = bomb(player1.get_x(),player1.get_y())
+                bombs.append(nbomb)
+                all_sprites_list.add(bombs)
+                player1.currentbomb += 1
 
     def grid():
         ty = False
